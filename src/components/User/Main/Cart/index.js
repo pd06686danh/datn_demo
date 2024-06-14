@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Cart.scss';
 import { Button, Col, Divider, Input, Row, Space, Table, Tag } from 'antd';
 import { MdDiscount } from "react-icons/md";
 import { CiCircleRemove } from "react-icons/ci";
+import { useSelector } from 'react-redux';
 
 const columns = [
   {
@@ -40,32 +41,41 @@ const columns = [
  
 ];
 
-const data = [
-  {
-    key: '1',
-    name: [
-      { icon: <span style={{fontSize:'25px'}}><CiCircleRemove /></span> },
-      { image: <img style={{width:'75px', height:'auto'}} src='https://thucpham4.giaodienwebmau.com/wp-content/uploads/2021/10/Group-8053-510x512.jpg'/> },
-      { name: <span style={{color:'green'}}>Củ cải xanh</span> },
-    ],
-    price: <span style={{color:'darkOrange', fontWeight:'bold'}}>150.000 VND</span>,
-    quantity: 1,
-    totalPrice : <span style={{color:'darkOrange', fontWeight:'bold'}}>150.000 VND</span>,
-  },
-  
-];
+
+
+
 
 export default function Cart() {
-  const price = 300000;
-  const totalPrice = 600000;
-  const [quantity , setQuantity]= useState(1)
-  const upQuantity = () => {
-    setQuantity(pre => pre + 1)
-  }
-  const downQuanitity = () => {
-    if(quantity < 1){return}
-    setQuantity(pre => pre - 1)
-  }
+
+
+  const listOrder = useSelector(state => state.order.carts)
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
+  useEffect(() => {
+    console.log(listOrder)
+    let tempSubtotal = 0;
+    listOrder.forEach(order => {
+      const price = order.detail.price;
+      const quantity = order.detail.quantity
+      tempSubtotal += price * quantity;
+    });
+    setTotalPrice(tempSubtotal)
+  }, [listOrder]);
+
+  
+  
+
+  const data = listOrder.map((order, index) => ({
+    key: index,
+    name: [
+      { icon: <span style={{fontSize:'25px'}}><CiCircleRemove /></span> },
+      { image: <img style={{width:'75px', height:'auto'}} src={order.detail.image} alt={order.name}/> },
+      { name: <span style={{color:'green'}}>{order.detail.name}</span> },
+    ],
+    price: <span style={{color:'darkOrange', fontWeight:'bold'}}>{order.detail.price}</span>,
+    quantity: order.quantity,
+    totalPrice : <span style={{color:'darkOrange', fontWeight:'bold'}}>{(order.detail.price )}</span>,
+  }));
   return (
     <Row className='cart-container'>
       <Col className='left' span={15}>
@@ -79,14 +89,14 @@ export default function Cart() {
         <div className='tamtinh'>
           <span style={{ color: 'gray' }}>Tạm tính</span>
           <span style={{ color: 'orange', fontWeight: 'bold' }}>
-            {price.toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}
+            
           </span>
         </div>
         <hr />
         <div className='tamtinh'>
           <span style={{ color: 'gray' }}>Tổng tiền</span>
           <span style={{ color: 'orange', fontWeight: 'bold' }}>
-            {totalPrice.toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}
+            {totalPrice}
           </span>
         </div>
         <hr />
